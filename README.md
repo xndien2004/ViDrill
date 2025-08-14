@@ -1,4 +1,4 @@
-# ViDRILL - Vietnamese Document Retrieval and Information Lookup Language
+# ViDRILL - Vietnamese Deep Retrieval in the expansive Legal Landscape
 
 🇻🇳 **Vietnamese Document Retrieval System for VLSP 2025**
 
