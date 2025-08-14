@@ -210,7 +210,7 @@ bash scripts/eval.sh
 
 * **E5 Multilingual**
 * **GTE Models**
-* **Sentence-BERT**
+* **BGE-M3**
 
 ### Sparse Retrieval
 
