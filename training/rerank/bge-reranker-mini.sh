@@ -1,0 +1,44 @@
+
+
+torchrun --nproc_per_node 2 \
+	-m FlagEmbedding.finetune.reranker.decoder_only.layerwise \
+    --model_name_or_path BAAI/bge-reranker-v2-minicpm-layerwise \
+    --use_lora True \
+    --lora_rank 32 \
+    --lora_alpha 64 \
+    --use_flash_attn True \
+    --target_modules q_proj k_proj v_proj o_proj \
+    --save_merged_lora_model True \
+    --model_type decoder \
+    --model_type from_finetuned_model \
+    --start_layer 8 \
+    --head_multi True \
+    --head_type simple \
+    --trust_remote_code True \
+    --cache_dir ./cache/model \
+    --train_data /home/fit02/dien-workspace/vlsp/data_drill/maxlen2000/train-neg-top60-finetune.json \
+    --cache_path ./cache/data \
+    --train_group_size 10 \
+    --query_max_len 128 \
+    --passage_max_len 2048 \
+    --pad_to_multiple_of 8 \
+    --knowledge_distillation False \
+    --query_instruction_for_rerank 'A: ' \
+    --query_instruction_format '{}{}' \
+    --passage_instruction_for_rerank 'B: ' \
+    --passage_instruction_format '{}{}' \
+    --output_dir /home/fit02/dien-workspace/vlsp/output/bge-reranker-mini-neg-top60-finetune \
+    --overwrite_output_dir \
+    --learning_rate 2e-4 \
+    --bf16 \
+    --num_train_epochs 10 \
+    --per_device_train_batch_size 4 \
+    --gradient_accumulation_steps 1 \
+    --dataloader_drop_last True \
+    --warmup_ratio 0.1 \
+    --gradient_checkpointing \
+    --weight_decay 0.01 \
+    --deepspeed /home/fit02/dien-workspace/vlsp/ViDRILL/config/ds_zero2.json \
+    --logging_steps 1 \
+    --save_steps 1000 \
+    2>&1 | tee bge-reranker-mini-neg-top60-finetune.log

@@ -1,0 +1,19 @@
+{
+  "zero_optimization": {
+    "stage": 2,
+    "offload_optimizer": {
+      "device": "cpu"
+    },
+    "offload_param": {
+      "device": "cpu"
+    }
+  },
+  "train_batch_size": 4,
+  "gradient_accumulation_steps": 1,
+  "bf16": {
+    "enabled": true
+  },
+  "fp16": {
+    "enabled": false
+  }
+}
