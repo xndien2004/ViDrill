@@ -6,7 +6,9 @@
 
 **ViDRILL** is an advanced Vietnamese document retrieval system developed for the VLSP 2025 competition. It combines state-of-the-art retrieval methods, including embedding-based models, BM25, and large language models (LLMs), to achieve high performance in information retrieval from Vietnamese corpora.
 
-In addition to standard retrieval pipelines, ViDRILL supports **LLM fine-tuning with reinforcement learning (PPO)** for self-guided query expansion and rewriting, enabling more precise document search and ranking.
+In addition to standard retrieval pipelines, ViDRILL supports **LLM fine-tuning with reinforcement learning (PPO / GRPO)** for self-guided query expansion, rewriting, and reasoning, enabling precise document selection and ranking.
+
+---
 
 ## 🎯 Features
 
@@ -19,9 +21,12 @@ In addition to standard retrieval pipelines, ViDRILL supports **LLM fine-tuning 
 * **LLM Self-Searching & Query Rewriting**:
 
   * Fine-tune LLMs to rewrite queries for better retrieval
-  * PPO-based reinforcement learning for self-guided search
+  * PPO/GRPO-based reinforcement learning for self-guided search
+  * Interleaved reasoning + search with ViSearch-R1
 * **Vietnamese Language Support**: Specially optimized for Vietnamese text
 * **Scalable Architecture**: Handles large corpora using Qdrant vector database
+
+---
 
 ## 🏗️ Architecture
 
@@ -32,12 +37,14 @@ ViDRILL/
 │   ├── retrieval/      # Dense retrieval training
 │   ├── rerank/         # Reranking model training  
 │   ├── llm/            # LLM fine-tuning (SFT or GRPO)
-│   └── DeepRetrieval/  # LLM query rewriting training
-│   └── ViSearch-R1/    # LLM query and auto searching
+│   ├── DeepRetrieval/  # LLM query rewriting training
+│   └── ViSearch-R1/    # LLM reasoning + self-searching training
 ├── prepare_data/       # Data preprocessing utilities
 ├── eval/               # Evaluation scripts
 └── config/             # Training and system configurations
 ```
+
+---
 
 ## 🚀 Setup and Usage
 
@@ -63,9 +70,11 @@ bash scripts/main.sh
 python build_db_corpus.py
 ```
 
-### 3. Training Models
+---
 
-#### Dense Retrieval Models
+## 3. Training Models
+
+### Dense Retrieval Models
 
 ```bash
 cd training/retrieval
@@ -81,7 +90,7 @@ bash e5-instruct.sh
 # bash bge-m3.sh
 ```
 
-#### Reranking Models
+### Reranking Models
 
 ```bash
 cd training/rerank
@@ -91,19 +100,14 @@ cd training/rerank
 # bash bge-reranker-mini.sh
 ```
 
-Bạn có thể chỉnh phần này trong README để làm rõ là **có thể chọn 1 trong 2 phương pháp LLM fine-tuning (SFT hoặc GRPO)** để từ các top-k documents liên quan nhất, LLM học cách chọn tài liệu phù hợp. Ví dụ như sau:
+### LLM Components (Choose One: SFT or GRPO)
 
----
-
-#### LLM Components (Choose One: SFT or GRPO)
-
-You can fine-tune the LLM to select the most relevant documents from top-k retrieval results using **either Supervised Fine-Tuning (SFT) or GRPO (PPO-style reinforcement learning)**.
+Fine-tune the LLM to select the most relevant documents from top-k retrieval results.
 
 **Option 1: Supervised Fine-Tuning (SFT)**
 
 ```bash
 cd training/llm
-# Train LLM with supervised examples to select the most relevant documents
 bash scripts/train_sft.sh
 ```
 
@@ -111,64 +115,75 @@ bash scripts/train_sft.sh
 
 ```bash
 cd training/llm
-# Train LLM using GRPO to optimize self-guided document selection from top-k
 bash scripts/train_grpo.sh
 ```
 
 *Notes:*
 
-* Both methods use the top-k retrieved documents as input.
-* The LLM learns to select to pick the most relevant document(s).
-* Choose **one method** depending on your workflow or experiment needs.
-
-
-#### LLM Query Rewriting with PPO ()
-
-To fine-tune the LLM to rewrite queries and select the most relevant documents, follow these steps:
-
-1. **Prepare Data**
-   Format the training and retrieval data for LLM fine-tuning:
-
-```bash
-cd training/DeepRetrieval
-# Run data processing script
-bash scripts/run_data_process.sh
-```
-
-2. **Start Retrieval Server**
-   Provide top-k retrieved documents as input to the LLM during training:
-
-```bash
-# Start retrieval server
-bash scripts/run_retrieval_server.sh
-```
-
-3. **Train LLM with PPO (GRPO)**
-   Fine-tune the LLM to improve query rewriting and document selection using rewards from correct retrieval and formatting, following the methodology in [arXiv:2503.00223](https://arxiv.org/pdf/2503.00223):
-
-```bash
-# Train LLM for query rewriting and reward-based optimization
-bash scripts/train_ppo.sh
-```
-
-**Notes:**
-
-* The LLM uses **top-k documents from the retrieval server** to learn which documents are most relevant.
-* Rewards are assigned based on **retrieval correctness** and **document formatting**, enabling the LLM to improve both query rewriting and selection accuracy.
-* Only run **train\_ppo.sh** after data processing and the retrieval server are ready.
+* Both methods use top-k retrieved documents as input.
+* The LLM learns to pick the most relevant document(s).
+* Choose **one method** depending on workflow or experiments.
 
 ---
 
-### 4. Running the Retrieval Pipeline
+### LLM Query Rewriting with PPO (DeepRetrieval)
 
-#### Encode Corpus
+```bash
+cd training/DeepRetrieval
+
+# 1. Prepare Data
+bash scripts/run_data_process.sh
+
+# 2. Start Retrieval Server
+bash scripts/run_retrieval_server.sh
+
+# 3. Train LLM with PPO (GRPO)
+bash scripts/train_ppo.sh
+```
+
+*Notes:*
+
+* Uses top-k retrieved documents to learn relevance.
+* Rewards are based on retrieval correctness and proper formatting.
+* Run **train\_ppo.sh** only after data processing and retrieval server are ready.
+
+---
+
+### ViSearch-R1: Reasoning & Self-Searching LLMs
+
+ViSearch-R1 is an RL framework to train **interleaved reasoning-and-searching LLMs**, inspired by [arXiv:2503.09516](https://arxiv.org/abs/2503.09516).
+
+```bash
+cd training/ViSearch-R1
+
+# 1. Prepare Data
+bash scripts/run_data_process.sh
+
+# 2. Start Retrieval Server
+bash scripts/run_retrieval_server.sh
+
+# 3. Train LLM with RL (PPO / GRPO / Reinforce)
+bash scripts/train_ppo.sh
+```
+
+*Notes:*
+
+* LLM reasons over top-k documents and decides when to call search engines.
+* Rewards: correctness of retrieved documents, output formatting, reasoning efficiency.
+* Supports various RL algorithms, LLMs (e.g., LLaMA3, Qwen2.5), and search engines (local or online).
+
+---
+
+## 4. Running the Retrieval Pipeline
+
+### Encode Corpus
 
 ```bash
 cd pipeline/scripts
 bash encode_corpus.sh
 ```
 
-#### Run Retrieval
+### Run Retrieval
 
 ```bash
 # Hybrid: E5 + Sentence-BERT + BM25
@@ -178,12 +193,16 @@ bash main_e5_sentence_bm25.sh
 bash main_e5_sentence.sh
 ```
 
-### 5. Evaluation
+---
+
+## 5. Evaluation
 
 ```bash
 cd eval
 bash scripts/eval.sh
 ```
+
+---
 
 ## 📊 Pipeline Components
 
@@ -196,37 +215,32 @@ bash scripts/eval.sh
 ### Sparse Retrieval
 
 * **BM25**: Traditional keyword-based retrieval
-* **Hybrid Scoring**: Combines dense and sparse retrieval results
+* **Hybrid Scoring**: Combine dense and sparse results
 
 ### Reranking
 
-* **BGE Reranker**: Cross-encoder neural reranking models
+* **BGE Reranker**: Cross-encoder neural reranking
 * **LLM Reranking**: LLM-based reranking
-* **PPO Self-Searching**: LLM fine-tuned with reinforcement learning to autonomously improve retrieval
+* **PPO Self-Searching**: LLM fine-tuned with RL to autonomously improve retrieval
 
 ### Query Processing
 
 * **HyDE**: Hypothetical Document Embeddings
-* **Query Expansion & Rewriting**: LLM-based query enhancement and rewriting
+* **Query Expansion & Rewriting**: LLM-based
 
-## 📁 Key Files
-
-* [`encoder.py`](encoder.py) - Utilities for document encoding
-* [`search.py`](search.py) - Main search engine functionality
-* [`combine_ranking_score.py`](conbine_ranking_score.py) - Methods to combine retrieval scores
-* [`pipeline/main_e5_sentence_bm25.py`](pipeline/main_e5_sentence_bm25.py) - Hybrid retrieval pipeline script
-* [`eval/eval.py`](eval/eval.py) - Evaluation metrics and scripts
-* [`training/llm/scripts/train_ppo.sh`](training/llm/scripts/train_ppo.sh) - LLM PPO training script
-* [`training/query_rewrite/scripts/train_rewriter.sh`](training/query_rewrite/scripts/train_rewriter.sh) - Query rewriting training script
+---
 
 ## 🛠️ Configuration
 
-All training configurations are stored in the [`config/`](config/) directory:
-
 * [`ds_zero1.json`](config/ds_zero1.json) - DeepSpeed ZeRO stage 1
 * [`ds_zero2.json`](config/ds_zero2.json) - DeepSpeed ZeRO stage 2
-* [`ppo_config.json`](config/ppo_config.json) - PPO RL training configuration for LLM
+
+## 🔗 References
+
+* ViSearch-R1 Paper: [arXiv:2503.09516](https://arxiv.org/abs/2503.09516)
+* DeepRetrieval Paper: [arXiv:2503.00223](https://arxiv.org/pdf/2503.00223)
+---
 
 ## 🤝 Contributing
 
-This project is developed for the VLSP 2025 competition. For questions, issues, or contributions, please follow the competition guidelines and submit issues or pull requests accordingly.
+This project is developed for the VLSP 2025 competition. For questions, issues, or contributions, follow competition guidelines and submit issues or pull requests accordingly.
