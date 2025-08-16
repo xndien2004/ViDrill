@@ -2,6 +2,8 @@
 
 🇻🇳 **Vietnamese Document Retrieval System for VLSP 2025**
 
+👉 If you find this project interesting and useful, please give it a **star ⭐** to support us!
+
 ## 📍 Overview
 
 **ViDRILL** is an advanced Vietnamese document retrieval system developed for the VLSP 2025 competition. It combines traditional retrieval methods, including embedding-based models and BM25, to achieve high performance in information retrieval from Vietnamese corpora.
