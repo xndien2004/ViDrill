@@ -71,6 +71,7 @@ def main(args):
         model=model,
         train_dataset=dataset,
         args=training_args,
+        processing_class=tokenizer,
         # formatting_func=formatting_func
     )
 
