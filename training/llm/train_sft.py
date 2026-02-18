@@ -20,16 +20,16 @@ def main(args):
         trust_remote_code=True
     )
 
-    peft_config = LoraConfig(
-        r=args.lora_r,
-        lora_alpha=args.lora_alpha,
-        lora_dropout=args.lora_dropout,
-        bias="none",
-        task_type="CAUSAL_LM",
-        target_modules="all-linear",
-    )
-    model = get_peft_model(model, peft_config)
-    model.print_trainable_parameters()
+    # peft_config = LoraConfig(
+    #     r=args.lora_r,
+    #     lora_alpha=args.lora_alpha,
+    #     lora_dropout=args.lora_dropout,
+    #     bias="none",
+    #     task_type="CAUSAL_LM",
+    #     target_modules="all-linear",
+    # )
+    # model = get_peft_model(model, peft_config)
+    # model.print_trainable_parameters()
 
     training_args = SFTConfig(
         output_dir=args.output_dir,
