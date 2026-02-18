@@ -1,4 +1,4 @@
-# ViDRILL - Vietnamese Deep Retrieval in the Expansive Legal Landscape
+# ViDRILL: A Multi-Stage Retrieval Framework for Vietnamese Legal Document Search
 
 🇻🇳 **Vietnamese Document Retrieval System for VLSP 2025**
 
