@@ -4,7 +4,8 @@ def count_tokens(text):
     return len(text.split())
 
 def get_last_overlap(text):
-    section_pattern = r'\n*(\d{1,2}\..*?)(?=\n\d{1,2}\.|$)'
+    # section_pattern = r'\n*(\d{1,2}\..*?)(?=\n\d{1,2}\.|$)'
+    section_pattern = r'[^.!?]+[.!?]'
     sections = re.findall(section_pattern, text.strip(), flags=re.DOTALL)
     if sections:
         return sections[-1].strip()
@@ -20,7 +21,8 @@ def get_last_overlap(text):
     return text.strip()
 
 def split_chunks(text, max_len=2000):
-    section_pattern = r'\n*(\d{1,2}\..*?)(?=\n\d{1,2}\.|$)'
+    # section_pattern = r'\n*(\d{1,2}\..*?)(?=\n\d{1,2}\.|$)'
+    section_pattern = r'[^.!?]+[.!?]'
     sections = re.findall(section_pattern, text, flags=re.DOTALL)
 
     if not sections:
